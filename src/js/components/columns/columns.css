@@ -1,0 +1,83 @@
+.wrapper {
+    max-width: 1360px;
+    padding: 20px;
+    margin: 0 auto;
+}
+.columns-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.column-title {
+    font-size: 1.5rem;
+    color: rgba(0, 0, 0, 0.688);
+    font-weight: bold;
+}
+.column-item {
+    width: calc(100% / 3 - 20px);
+    min-height: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #EBECF0;
+}
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 70px;
+}
+.add-card {
+    width: 100%;
+    bottom: 10px;
+    cursor: pointer;
+    color: gray;
+}
+.form {
+    display: none;
+    bottom: 10px;
+    margin-top: 20px;
+}
+.form-active {
+    display: block;
+}
+.form-settings-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.input-text {
+    padding: 5px;
+    border: 1px solid black;
+}
+.textarea {
+    min-width: 100%;
+    max-width: 100%;
+    min-height: 5rem;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+.add-content-btn {
+    padding: 5px;
+    background-color: green;
+    color: azure;
+    border-radius: 5px;
+}
+.form-remover {
+    cursor: pointer;
+}
+
+.error {
+    display: none;
+    padding: 5px;
+    background-color: rgba(240, 33, 75, 0.708);
+    color: black;
+}
+.active {
+    display: block;
+}

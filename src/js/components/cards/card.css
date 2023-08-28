@@ -1,0 +1,37 @@
+.card-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 3rem;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #FFFFFF;  
+}
+.card-wrapper:hover {
+    cursor: grab;
+}
+.card-content {
+    padding: 5px;
+    max-width: 90%;
+    word-wrap: break-word;
+}
+.card-remover {
+    display: none;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+.active {
+    display: block;
+}
+.dragged {
+    position: absolute;
+    z-index: 1000;
+    cursor: grabbing;
+}
+.clone {
+    background-color: rgba(0, 0, 0, 0.221);
+    border-radius: 5px;
+}
