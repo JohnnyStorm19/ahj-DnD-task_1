@@ -1,4 +1,5 @@
-export default function createCloneEl(dragRect) {
+export default function createCloneEl(el) {
+    const dragRect = el.getBoundingClientRect();
     const cloneWidth = dragRect.width;
     const cloneHeight = dragRect.height;
 

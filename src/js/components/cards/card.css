@@ -30,6 +30,7 @@
     position: absolute;
     z-index: 1000;
     cursor: grabbing;
+    pointer-events: none;
 }
 .clone {
     background-color: rgba(0, 0, 0, 0.221);

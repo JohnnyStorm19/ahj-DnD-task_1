@@ -1,15 +1,11 @@
 import Columns from "../columns/Columns";
 import createCloneEl from "../dragNdrop _funcs/createClonEl";
-import moveAt from "../dragNdrop _funcs/moveAt";
-import onMove from "../dragNdrop _funcs/onMove";
 
 export default class AppControl {
     constructor(parentEl) {
         this.parentEl = parentEl;
-
-        this.onMouseUp = this.onMouseUp.bind(this);
-        this.onMouseDown = this.onMouseDown.bind(this);
-
+        this.draggingElement = null;
+		this.draggingClone = null;
     }
     bindToDOM() {
         const columnsInstance = new Columns(this.parentEl);
@@ -41,65 +37,91 @@ export default class AppControl {
             }
         })
 
-        document.addEventListener('pointerdown', (e) => {
-            const target = e.target;
-            this.actualEl;    
-            if (target.classList.contains('card-wrapper') || target.classList.contains('card-content')) {
-                e.preventDefault();
-                let shiftX = e.clientX - target.getBoundingClientRect().left;
-                let shiftY = e.clientY - target.getBoundingClientRect().top;
-
-                this.actualEl = target.closest('.card-wrapper');
-
-                this.onMouseDown(this.actualEl);
-                moveAt(this.actualEl, e.pageX, e.pageY, shiftX, shiftY);
-
-                this.onMouseMoveFunc = (e) => onMove.call(null, e, this.actualEl, shiftX, shiftY); // функция колбек для движения мыши
-                this.onMouseUpFunc = () => this.onMouseUp.call(null, this.actualEl); // функция колбек после отпускания левой кнопки мыши
-
-                document.addEventListener('pointermove', this.onMouseMoveFunc);
-                this.actualEl.addEventListener('pointerup', this.onMouseUpFunc);
-            }
-        })
+        document.addEventListener('pointerdown', this.onMouseDown);
+        document.addEventListener('pointerup', this.onMouseUp);
     }
+    onMouseDown = (e) => {
+        const target = e.target;
+        if (target.closest('.card-wrapper')) {
+            const draggedEl = target.closest('.card-wrapper');
+            this.draggingElement = draggedEl;
 
-    onMouseDown(el) {
-        // const clones = document.querySelectorAll('.clone');
-        // if (clones.length) clones.forEach(el => el.remove());
+            this.shiftX = e.offsetX;
+			this.shiftY = e.offsetY;
 
-        const cardsContainer = el.closest('.cards');
-        let {width: wrapperWidth} = cardsContainer.getBoundingClientRect();
-        el.style.width = wrapperWidth + 'px';
+            draggedEl.style.left = `${e.clientX - this.shiftX}px`;
+            draggedEl.style.top = `${e.clientY - this.shiftY}px`;
 
-        let dragRect = el.getBoundingClientRect();
-        let cloneEl = createCloneEl(dragRect);
-
-        console.log(cloneEl)
-
-        if (el.nextElementSibling != null) {
-            console.log('Вставляем клона перед!');
-            cardsContainer.insertBefore(cloneEl, el.nextElementSibling);
-        } else {
-            console.log('Вставляем клона в конец')
-            cardsContainer.append(cloneEl);
+            this.onDragged(e);
+            document.addEventListener('pointermove', this.onMouseMove);
         }
-
-        el.classList.add('dragged');
     }
-    onMouseUp(el) {
-        let clone = document.querySelector('.clone') || null; // находим клонированный элемент (силуэт)
-
-        if (clone){
-            clone.replaceWith(el);
-            clone.remove();
-        }
-        el.classList.remove('dragged');
-        el.style.width = '100%';
-
-        // удаляем обработчики
-        document.removeEventListener('mousemove', this.onMouseMoveFunc);
-        this.actualEl.removeEventListener('mouseup', this.onMouseUpFunc);
-
+    onMouseUp = () => {
+        if (this.draggingElement) {
+            this.draggingElement.classList.remove('dragged');
+			this.replaceDragging();
+		}
+        this.clear();
+        document.removeEventListener('pointermove', this.onMouseMove);
         localStorage.setItem('markup', this.parentEl.innerHTML);
+    }
+    onMouseMove = (e) => {
+        e.preventDefault();
+
+        if (this.draggingElement) {
+            this.draggingElement.style.left = `${e.clientX - this.shiftX}px`;
+            this.draggingElement.style.top = `${e.clientY - this.shiftY}px`;
+
+            const { width } = window.getComputedStyle(this.draggingElement);
+
+            this.setDragged(this.draggingElement, width);
+            this.onDragged(e);
+        }
+    }
+    clear() {
+        this.draggingElement = null;
+		this.draggingClone = null;
+    }
+
+    setDragged(el, width) {
+        el.classList.add('dragged');
+        el.style.width = width;
+    }
+    removeDragged(el) {
+        el.classList.remove('dragged');
+    }
+    replaceDragging() {
+        this.draggingClone.replaceWith(this.draggingElement);
+    }
+    onDragged = (e) => {
+        const target = e.target.closest('.card-wrapper');
+        const column = e.target.classList.contains('column-item');
+
+        // если навели на карточку
+        if (target) {
+            let cloneEl= createCloneEl(target);
+    
+            const { y, height } = target.getBoundingClientRect();
+            const appendPosition = y + height / 2 > e.clientY
+                ? "beforebegin"
+                : "afterend";
+            if (!this.draggingClone) {
+                this.draggingClone = cloneEl;
+            } else {
+                this.draggingClone.remove();
+                target.insertAdjacentElement(appendPosition, this.draggingClone);
+            }
+
+        }
+        // если навели на колонку 
+        if (column) {
+            let cardsContainer = e.target.querySelector('.cards');
+
+            // * Внутри контейнера ЛИБО пусто, ЛИБО будет дрэг-элемент, который мы перетаскиваем, но он остается внутри контейнера, поэтому длина 0 или 1
+            if (![...cardsContainer.children].length || cardsContainer.children.length === 1) {
+                this.draggingClone.remove();
+                cardsContainer.append(this.draggingClone);
+            }
+        }
     }
 }

@@ -1,8 +1,6 @@
 import Card from '../cards/Card';
 import './columns.css'
 
-/* <input type="text" class="input-text" placeholder="Enter card content..." required></input> */
-
 export default class Columns {
     constructor(parentEl) {
         this.parentEl = parentEl;
